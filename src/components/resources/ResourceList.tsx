@@ -133,14 +133,14 @@ const ResourceList: React.FC<ResourceListProps> = ({
           <div>
             <Label htmlFor="kit">Kit</Label>
             <Select
-              value={selectedKitId || ''}
-              onValueChange={(value) => setSelectedKitId(value || null)}
+              value={selectedKitId || 'all-kits'}
+              onValueChange={(value) => setSelectedKitId(value === 'all-kits' ? null : value)}
             >
               <SelectTrigger id="kit">
                 <SelectValue placeholder="All Kits" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Kits</SelectItem>
+                <SelectItem value="all-kits">All Kits</SelectItem>
                 {kits.map((kit) => (
                   <SelectItem key={kit.id} value={kit.id}>
                     {kit.title}
@@ -153,14 +153,14 @@ const ResourceList: React.FC<ResourceListProps> = ({
           <div>
             <Label htmlFor="language">Language</Label>
             <Select
-              value={selectedLanguageId || ''}
-              onValueChange={(value) => setSelectedLanguageId(value || null)}
+              value={selectedLanguageId || 'all-languages'}
+              onValueChange={(value) => setSelectedLanguageId(value === 'all-languages' ? null : value)}
             >
               <SelectTrigger id="language">
                 <SelectValue placeholder="All Languages" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Languages</SelectItem>
+                <SelectItem value="all-languages">All Languages</SelectItem>
                 {languages.map((language) => (
                   <SelectItem key={language.id} value={language.id}>
                     {language.name}
@@ -173,14 +173,14 @@ const ResourceList: React.FC<ResourceListProps> = ({
           <div>
             <Label htmlFor="type">Type</Label>
             <Select
-              value={selectedResourceType || ''}
-              onValueChange={(value) => setSelectedResourceType(value || null)}
+              value={selectedResourceType || 'all-types'}
+              onValueChange={(value) => setSelectedResourceType(value === 'all-types' ? null : value)}
             >
               <SelectTrigger id="type">
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all-types">All Types</SelectItem>
                 <SelectItem value="pdf">PDF Documents</SelectItem>
                 <SelectItem value="video">Videos</SelectItem>
                 <SelectItem value="audio">Audio</SelectItem>

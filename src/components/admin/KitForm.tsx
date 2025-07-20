@@ -172,7 +172,7 @@ const KitForm: React.FC<KitFormProps> = ({ kit, onSuccess }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Grade</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || undefined}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select grade" />

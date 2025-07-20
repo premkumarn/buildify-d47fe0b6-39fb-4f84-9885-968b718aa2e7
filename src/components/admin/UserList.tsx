@@ -146,7 +146,7 @@ const UserList: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <Select
-                        defaultValue={user.role || 'student'}
+                        value={user.role || 'student'}
                         onValueChange={(value: 'student' | 'teacher' | 'admin') => 
                           updateUserRole(user.id, value)
                         }

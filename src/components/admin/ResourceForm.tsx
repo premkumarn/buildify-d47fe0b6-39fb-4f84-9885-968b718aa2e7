@@ -253,7 +253,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({ resource, onSuccess }) => {
                     <FormLabel>Kit</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
-                      defaultValue={field.value}
+                      value={field.value || undefined}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -261,11 +261,15 @@ const ResourceForm: React.FC<ResourceFormProps> = ({ resource, onSuccess }) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {kits.map((kit) => (
-                          <SelectItem key={kit.id} value={kit.id}>
-                            {kit.title}
-                          </SelectItem>
-                        ))}
+                        {kits.length > 0 ? (
+                          kits.map((kit) => (
+                            <SelectItem key={kit.id} value={kit.id}>
+                              {kit.title}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-kits">No kits available</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -281,7 +285,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({ resource, onSuccess }) => {
                     <FormLabel>Language</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
-                      defaultValue={field.value}
+                      value={field.value || undefined}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -289,11 +293,15 @@ const ResourceForm: React.FC<ResourceFormProps> = ({ resource, onSuccess }) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {languages.map((language) => (
-                          <SelectItem key={language.id} value={language.id}>
-                            {language.name}
-                          </SelectItem>
-                        ))}
+                        {languages.length > 0 ? (
+                          languages.map((language) => (
+                            <SelectItem key={language.id} value={language.id}>
+                              {language.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-languages">No languages available</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -310,7 +318,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({ resource, onSuccess }) => {
                   <FormLabel>Resource Type</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>

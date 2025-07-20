@@ -118,14 +118,14 @@ const KitList: React.FC<KitListProps> = ({
           <div>
             <Label htmlFor="grade">Grade</Label>
             <Select
-              value={selectedGrade || ''}
-              onValueChange={(value) => setSelectedGrade(value || null)}
+              value={selectedGrade || 'all-grades'}
+              onValueChange={(value) => setSelectedGrade(value === 'all-grades' ? null : value)}
             >
               <SelectTrigger id="grade">
                 <SelectValue placeholder="All Grades" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Grades</SelectItem>
+                <SelectItem value="all-grades">All Grades</SelectItem>
                 <SelectItem value="6">Grade 6</SelectItem>
                 <SelectItem value="7">Grade 7</SelectItem>
                 <SelectItem value="8">Grade 8</SelectItem>

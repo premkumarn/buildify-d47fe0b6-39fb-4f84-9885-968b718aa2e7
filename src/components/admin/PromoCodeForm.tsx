@@ -195,7 +195,7 @@ const PromoCodeForm: React.FC<PromoCodeFormProps> = ({ promoCode, onSuccess }) =
                     <FormLabel>Kit</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
-                      defaultValue={field.value || undefined}
+                      value={field.value || undefined}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -203,11 +203,15 @@ const PromoCodeForm: React.FC<PromoCodeFormProps> = ({ promoCode, onSuccess }) =
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {kits.map((kit) => (
-                          <SelectItem key={kit.id} value={kit.id}>
-                            {kit.title}
-                          </SelectItem>
-                        ))}
+                        {kits.length > 0 ? (
+                          kits.map((kit) => (
+                            <SelectItem key={kit.id} value={kit.id}>
+                              {kit.title}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-kits">No kits available</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
