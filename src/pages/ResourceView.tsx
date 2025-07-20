@@ -118,5 +118,3 @@ const ResourceView: React.FC = () => {
 };
 
 export default ResourceView;
-
-export default ResourceView;
