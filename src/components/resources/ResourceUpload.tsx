@@ -105,17 +105,29 @@ const ResourceUpload: React.FC<ResourceUploadProps> = ({ onSuccess }) => {
       
       if (uploadError) throw uploadError;
       
+      // Get the public URL for the file
+      const { data: fileUrlData } = supabase.storage
+        .from('resources')
+        .getPublicUrl(filePath);
+      
       // 2. Upload thumbnail if provided
-      let thumbnailPath = null;
+      let thumbnailUrl = null;
       if (data.thumbnail) {
         const thumbExt = data.thumbnail.name.split('.').pop();
-        thumbnailPath = `thumbnails/${data.kit_id}/${Date.now()}.${thumbExt}`;
+        const thumbnailPath = `thumbnails/${data.kit_id}/${Date.now()}.${thumbExt}`;
         
         const { error: thumbError } = await supabase.storage
           .from('resources')
           .upload(thumbnailPath, data.thumbnail);
         
         if (thumbError) throw thumbError;
+        
+        // Get the public URL for the thumbnail
+        const { data: thumbUrlData } = supabase.storage
+          .from('resources')
+          .getPublicUrl(thumbnailPath);
+        
+        thumbnailUrl = thumbUrlData.publicUrl;
       }
       
       // 3. Create resource record in database
@@ -127,9 +139,9 @@ const ResourceUpload: React.FC<ResourceUploadProps> = ({ onSuccess }) => {
           kit_id: data.kit_id,
           language_id: data.language_id,
           resource_type: data.resource_type,
-          file_path: filePath,
+          file_path: fileUrlData.publicUrl,
           file_size: data.file.size,
-          thumbnail_url: thumbnailPath,
+          thumbnail_url: thumbnailUrl,
           is_active: true,
         });
       

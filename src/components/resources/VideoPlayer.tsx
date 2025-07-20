@@ -1,116 +1,60 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { supabase, getPublicUrl } from '@/lib/supabase';
-import { Resource } from '@/types';
+import React, { useState, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 interface VideoPlayerProps {
-  resource: Resource;
-  onView?: () => void;
-  onProgress?: (duration: number, completed: boolean) => void;
+  url: string;
+  title: string;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ resource, onView, onProgress }) => {
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title }) => {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const progressInterval = useRef<number | null>(null);
 
-  useEffect(() => {
-    const loadVideo = async () => {
-      try {
-        setLoading(true);
-        
-        // Get the public URL for the video
-        const url = getPublicUrl('resources', resource.file_path);
-        setVideoUrl(url);
-        
-        // Record view activity
-        if (onView) {
-          onView();
-        }
-      } catch (error: any) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadVideo();
-    
-    return () => {
-      if (progressInterval.current) {
-        window.clearInterval(progressInterval.current);
-      }
-    };
-  }, [resource, onView]);
+  const handleVideoLoad = () => {
+    setLoading(false);
+  };
 
-  useEffect(() => {
-    if (videoRef.current && onProgress) {
-      // Set up progress tracking
-      const video = videoRef.current;
-      
-      const handleTimeUpdate = () => {
-        const currentTime = video.currentTime;
-        const duration = video.duration;
-        const completed = currentTime >= duration * 0.9; // Consider completed if watched 90%
-        
-        onProgress(Math.floor(currentTime), completed);
-      };
-      
-      // Update every 5 seconds
-      progressInterval.current = window.setInterval(handleTimeUpdate, 5000);
-      
-      // Also update on pause and end
-      video.addEventListener('pause', handleTimeUpdate);
-      video.addEventListener('ended', handleTimeUpdate);
-      
-      return () => {
-        if (progressInterval.current) {
-          window.clearInterval(progressInterval.current);
-        }
-        video.removeEventListener('pause', handleTimeUpdate);
-        video.removeEventListener('ended', handleTimeUpdate);
-      };
-    }
-  }, [videoRef, onProgress]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-96">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
-    );
-  }
+  const handleVideoError = () => {
+    setError('Failed to load video. Please try again later.');
+    setLoading(false);
+  };
 
   return (
     <div className="w-full aspect-video border rounded-md overflow-hidden">
-      {videoUrl && (
-        <video
-          ref={videoRef}
-          src={videoUrl}
-          controls
-          className="w-full h-full"
-          controlsList="nodownload"
-          onContextMenu={(e) => e.preventDefault()}
-        >
-          Your browser does not support the video tag.
-        </video>
+      {loading && (
+        <div className="flex justify-center items-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
       )}
+      
+      {error && (
+        <Alert variant="destructive" className="m-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      <video
+        ref={videoRef}
+        src={url}
+        controls
+        className="w-full h-full"
+        controlsList="nodownload"
+        onContextMenu={(e) => e.preventDefault()}
+        onLoadedData={handleVideoLoad}
+        onError={handleVideoError}
+        style={{ display: loading ? 'none' : 'block' }}
+      >
+        Your browser does not support the video tag.
+      </video>
     </div>
   );
 };
+
+export default VideoPlayer;
 
 export default VideoPlayer;

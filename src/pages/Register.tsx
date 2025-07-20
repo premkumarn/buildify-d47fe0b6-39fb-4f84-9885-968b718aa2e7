@@ -26,9 +26,13 @@ const Register: React.FC = () => {
     setIsLoading(true);
 
     try {
+      // For demo purposes, if registering as admin@edtech.com, set role to admin
+      const isAdmin = email === 'admin@edtech.com';
+      const userRole = isAdmin ? 'admin' : role;
+      
       const { error } = await signUp(email, password, {
         full_name: fullName,
-        role,
+        role: userRole,
         school,
         grade: grade || null,
       });

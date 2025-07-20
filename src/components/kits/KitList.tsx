@@ -15,12 +15,14 @@ interface KitListProps {
   grade?: GradeLevel;
   limit?: number;
   showOnlyAccessible?: boolean;
+  searchQuery?: string;
 }
 
 const KitList: React.FC<KitListProps> = ({ 
   grade, 
   limit,
-  showOnlyAccessible = false
+  showOnlyAccessible = false,
+  searchQuery = ''
 }) => {
   const { user } = useAuth();
   const [kits, setKits] = useState<Kit[]>([]);
@@ -30,7 +32,10 @@ const KitList: React.FC<KitListProps> = ({
   
   // Filters
   const [selectedGrade, setSelectedGrade] = useState<string | null>(grade || null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
+
+  // Use the prop searchQuery if provided, otherwise use local state
+  const effectiveSearchQuery = searchQuery !== undefined ? searchQuery : localSearchQuery;
 
   useEffect(() => {
     const fetchKits = async () => {
@@ -47,8 +52,8 @@ const KitList: React.FC<KitListProps> = ({
           query = query.eq('grade', selectedGrade);
         }
         
-        if (searchQuery) {
-          query = query.ilike('title', `%${searchQuery}%`);
+        if (effectiveSearchQuery) {
+          query = query.ilike('title', `%${effectiveSearchQuery}%`);
         }
         
         // Apply limit if specified
@@ -99,21 +104,23 @@ const KitList: React.FC<KitListProps> = ({
     };
     
     fetchKits();
-  }, [selectedGrade, searchQuery, limit, user, showOnlyAccessible, userAccess]);
+  }, [selectedGrade, effectiveSearchQuery, limit, user, showOnlyAccessible, userAccess]);
 
   return (
     <div>
       <div className="mb-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="search">Search</Label>
-            <Input
-              id="search"
-              placeholder="Search kits..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          {searchQuery === undefined && (
+            <div>
+              <Label htmlFor="search">Search</Label>
+              <Input
+                id="search"
+                placeholder="Search kits..."
+                value={localSearchQuery}
+                onChange={(e) => setLocalSearchQuery(e.target.value)}
+              />
+            </div>
+          )}
           
           <div>
             <Label htmlFor="grade">Grade</Label>
