@@ -53,7 +53,7 @@ export interface Database {
           id: string
           title: string
           description: string | null
-          grade: 'grade_level' // '6' | '7' | '8' | '9' | '10'
+          grade: string
           thumbnail_url: string | null
           is_active: boolean | null
           created_at: string | null
@@ -63,7 +63,7 @@ export interface Database {
           id?: string
           title: string
           description?: string | null
-          grade: 'grade_level' // '6' | '7' | '8' | '9' | '10'
+          grade: string
           thumbnail_url?: string | null
           is_active?: boolean | null
           created_at?: string | null
@@ -73,7 +73,7 @@ export interface Database {
           id?: string
           title?: string
           description?: string | null
-          grade?: 'grade_level' // '6' | '7' | '8' | '9' | '10'
+          grade?: string
           thumbnail_url?: string | null
           is_active?: boolean | null
           created_at?: string | null
@@ -107,9 +107,9 @@ export interface Database {
         Row: {
           id: string
           full_name: string | null
-          role: 'user_role' | null // 'student' | 'teacher' | 'admin'
+          role: string | null
           school: string | null
-          grade: 'grade_level' | null // '6' | '7' | '8' | '9' | '10'
+          grade: string | null
           phone: string | null
           is_active: boolean | null
           created_at: string | null
@@ -118,9 +118,9 @@ export interface Database {
         Insert: {
           id: string
           full_name?: string | null
-          role?: 'user_role' | null // 'student' | 'teacher' | 'admin'
+          role?: string | null
           school?: string | null
-          grade?: 'grade_level' | null // '6' | '7' | '8' | '9' | '10'
+          grade?: string | null
           phone?: string | null
           is_active?: boolean | null
           created_at?: string | null
@@ -129,9 +129,9 @@ export interface Database {
         Update: {
           id?: string
           full_name?: string | null
-          role?: 'user_role' | null // 'student' | 'teacher' | 'admin'
+          role?: string | null
           school?: string | null
-          grade?: 'grade_level' | null // '6' | '7' | '8' | '9' | '10'
+          grade?: string | null
           phone?: string | null
           is_active?: boolean | null
           created_at?: string | null
@@ -189,7 +189,7 @@ export interface Database {
           title: string
           description: string | null
           language_id: string
-          resource_type: 'resource_type' // 'pdf' | 'video' | 'audio'
+          resource_type: string
           file_path: string
           file_size: number | null
           duration: number | null
@@ -204,7 +204,7 @@ export interface Database {
           title: string
           description?: string | null
           language_id: string
-          resource_type: 'resource_type' // 'pdf' | 'video' | 'audio'
+          resource_type: string
           file_path: string
           file_size?: number | null
           duration?: number | null
@@ -219,7 +219,7 @@ export interface Database {
           title?: string
           description?: string | null
           language_id?: string
-          resource_type?: 'resource_type' // 'pdf' | 'video' | 'audio'
+          resource_type?: string
           file_path?: string
           file_size?: number | null
           duration?: number | null
@@ -234,7 +234,7 @@ export interface Database {
           id: string
           user_id: string
           kit_id: string
-          access_type: 'access_type' // 'paid' | 'free' | 'promo'
+          access_type: string
           can_access_pdf: boolean | null
           can_access_video: boolean | null
           can_access_audio: boolean | null
@@ -248,7 +248,7 @@ export interface Database {
           id?: string
           user_id: string
           kit_id: string
-          access_type: 'access_type' // 'paid' | 'free' | 'promo'
+          access_type: string
           can_access_pdf?: boolean | null
           can_access_video?: boolean | null
           can_access_audio?: boolean | null
@@ -262,7 +262,7 @@ export interface Database {
           id?: string
           user_id?: string
           kit_id?: string
-          access_type?: 'access_type' // 'paid' | 'free' | 'promo'
+          access_type?: string
           can_access_pdf?: boolean | null
           can_access_video?: boolean | null
           can_access_audio?: boolean | null
@@ -308,8 +308,8 @@ export interface Database {
           kit_title: string
           kit_description: string | null
           kit_thumbnail_url: string | null
-          kit_grade: 'grade_level' // '6' | '7' | '8' | '9' | '10'
-          access_type: 'access_type' // 'paid' | 'free' | 'promo'
+          kit_grade: string
+          access_type: string
           can_access_pdf: boolean | null
           can_access_video: boolean | null
           can_access_audio: boolean | null

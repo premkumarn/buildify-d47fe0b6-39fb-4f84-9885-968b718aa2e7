@@ -1,154 +1,115 @@
 
-import React, { useRef, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Play, Pause, Volume2, VolumeX, Maximize } from 'lucide-react';
-import { Slider } from '@/components/ui/slider';
+import React, { useState, useEffect, useRef } from 'react';
+import { supabase, getPublicUrl } from '@/lib/supabase';
+import { Resource } from '@/types';
+import { Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface VideoPlayerProps {
-  url: string;
-  title: string;
+  resource: Resource;
+  onView?: () => void;
+  onProgress?: (duration: number, completed: boolean) => void;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ resource, onView, onProgress }) => {
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
+  const progressInterval = useRef<number | null>(null);
+
+  useEffect(() => {
+    const loadVideo = async () => {
+      try {
+        setLoading(true);
+        
+        // Get the public URL for the video
+        const url = getPublicUrl('resources', resource.file_path);
+        setVideoUrl(url);
+        
+        // Record view activity
+        if (onView) {
+          onView();
+        }
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
-      setIsPlaying(!isPlaying);
-    }
-  };
-  
-  const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
-  
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
-    }
-  };
-  
-  const handleLoadedMetadata = () => {
-    if (videoRef.current) {
-      setDuration(videoRef.current.duration);
-    }
-  };
-  
-  const handleVolumeChange = (value: number[]) => {
-    const newVolume = value[0];
-    setVolume(newVolume);
-    if (videoRef.current) {
-      videoRef.current.volume = newVolume;
-    }
-  };
-  
-  const handleSeek = (value: number[]) => {
-    const newTime = value[0];
-    setCurrentTime(newTime);
-    if (videoRef.current) {
-      videoRef.current.currentTime = newTime;
-    }
-  };
-  
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  };
-  
-  const handleFullscreen = () => {
-    if (videoRef.current) {
-      if (videoRef.current.requestFullscreen) {
-        videoRef.current.requestFullscreen();
+    };
+    
+    loadVideo();
+    
+    return () => {
+      if (progressInterval.current) {
+        window.clearInterval(progressInterval.current);
       }
+    };
+  }, [resource, onView]);
+
+  useEffect(() => {
+    if (videoRef.current && onProgress) {
+      // Set up progress tracking
+      const video = videoRef.current;
+      
+      const handleTimeUpdate = () => {
+        const currentTime = video.currentTime;
+        const duration = video.duration;
+        const completed = currentTime >= duration * 0.9; // Consider completed if watched 90%
+        
+        onProgress(Math.floor(currentTime), completed);
+      };
+      
+      // Update every 5 seconds
+      progressInterval.current = window.setInterval(handleTimeUpdate, 5000);
+      
+      // Also update on pause and end
+      video.addEventListener('pause', handleTimeUpdate);
+      video.addEventListener('ended', handleTimeUpdate);
+      
+      return () => {
+        if (progressInterval.current) {
+          window.clearInterval(progressInterval.current);
+        }
+        video.removeEventListener('pause', handleTimeUpdate);
+        video.removeEventListener('ended', handleTimeUpdate);
+      };
     }
-  };
-  
+  }, [videoRef, onProgress]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
-    <Card className="w-full">
-      <CardContent className="p-0 relative">
+    <div className="w-full aspect-video border rounded-md overflow-hidden">
+      {videoUrl && (
         <video
           ref={videoRef}
-          src={url}
-          className="w-full"
-          onTimeUpdate={handleTimeUpdate}
-          onLoadedMetadata={handleLoadedMetadata}
-          onEnded={() => setIsPlaying(false)}
-        />
-        
-        <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2 text-white">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-white hover:text-white hover:bg-white/20"
-                onClick={togglePlay}
-              >
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              </Button>
-              
-              <span className="text-xs">
-                {formatTime(currentTime)} / {formatTime(duration)}
-              </span>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-white hover:text-white hover:bg-white/20"
-                onClick={toggleMute}
-              >
-                {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-              </Button>
-              
-              <div className="w-20">
-                <Slider
-                  value={[volume]}
-                  min={0}
-                  max={1}
-                  step={0.1}
-                  onValueChange={handleVolumeChange}
-                />
-              </div>
-              
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-white hover:text-white hover:bg-white/20"
-                onClick={handleFullscreen}
-              >
-                <Maximize className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          
-          <Slider
-            value={[currentTime]}
-            min={0}
-            max={duration || 100}
-            step={1}
-            onValueChange={handleSeek}
-            className="w-full"
-          />
-        </div>
-      </CardContent>
-    </Card>
+          src={videoUrl}
+          controls
+          className="w-full h-full"
+          controlsList="nodownload"
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          Your browser does not support the video tag.
+        </video>
+      )}
+    </div>
   );
 };
 

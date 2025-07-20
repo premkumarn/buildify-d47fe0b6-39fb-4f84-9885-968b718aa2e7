@@ -3,121 +3,140 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Resource, Kit, Language } from '@/types';
 import ResourceCard from './ResourceCard';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface ResourceListProps {
   kitId?: string;
+  languageId?: string;
+  resourceType?: string;
+  limit?: number;
 }
 
-const ResourceList: React.FC<ResourceListProps> = ({ kitId }) => {
+const ResourceList: React.FC<ResourceListProps> = ({ 
+  kitId, 
+  languageId, 
+  resourceType,
+  limit 
+}) => {
   const [resources, setResources] = useState<Resource[]>([]);
-  const [loading, setLoading] = useState(true);
   const [kits, setKits] = useState<Kit[]>([]);
   const [languages, setLanguages] = useState<Language[]>([]);
-  const [filters, setFilters] = useState({
-    kitId: kitId || '',
-    languageId: '',
-    resourceType: '',
-    searchQuery: '',
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
+  // Filters
+  const [selectedKitId, setSelectedKitId] = useState<string | null>(kitId || null);
+  const [selectedLanguageId, setSelectedLanguageId] = useState<string | null>(languageId || null);
+  const [selectedResourceType, setSelectedResourceType] = useState<string | null>(resourceType || null);
+  const [searchQuery, setSearchQuery] = useState('');
+
   useEffect(() => {
-    const fetchResources = async () => {
-      setLoading(true);
-      
+    const fetchFilters = async () => {
       try {
-        let query = supabase
-          .from('resources')
+        // Fetch kits
+        const { data: kitsData, error: kitsError } = await supabase
+          .from('kits')
           .select('*')
           .eq('is_active', true);
         
-        if (filters.kitId) {
-          query = query.eq('kit_id', filters.kitId);
-        }
+        if (kitsError) throw kitsError;
         
-        if (filters.languageId) {
-          query = query.eq('language_id', filters.languageId);
-        }
+        // Fetch languages
+        const { data: languagesData, error: languagesError } = await supabase
+          .from('languages')
+          .select('*');
         
-        if (filters.resourceType) {
-          query = query.eq('resource_type', filters.resourceType);
-        }
+        if (languagesError) throw languagesError;
         
-        if (filters.searchQuery) {
-          query = query.ilike('title', `%${filters.searchQuery}%`);
-        }
-        
-        const { data, error } = await query;
-        
-        if (error) {
-          throw error;
-        }
-        
-        setResources(data || []);
+        setKits(kitsData as Kit[]);
+        setLanguages(languagesData as Language[]);
       } catch (error: any) {
-        toast.error(`Error fetching resources: ${error.message}`);
-        console.error('Error fetching resources:', error);
+        setError(error.message);
+      }
+    };
+    
+    fetchFilters();
+  }, []);
+
+  useEffect(() => {
+    const fetchResources = async () => {
+      try {
+        setLoading(true);
+        
+        let query = supabase
+          .from('resources')
+          .select(`
+            *,
+            languages (*)
+          `)
+          .eq('is_active', true);
+        
+        // Apply filters
+        if (selectedKitId) {
+          query = query.eq('kit_id', selectedKitId);
+        }
+        
+        if (selectedLanguageId) {
+          query = query.eq('language_id', selectedLanguageId);
+        }
+        
+        if (selectedResourceType) {
+          query = query.eq('resource_type', selectedResourceType);
+        }
+        
+        if (searchQuery) {
+          query = query.ilike('title', `%${searchQuery}%`);
+        }
+        
+        // Apply limit if specified
+        if (limit) {
+          query = query.limit(limit);
+        }
+        
+        // Order by most recent
+        query = query.order('created_at', { ascending: false });
+        
+        const { data, error: resourcesError } = await query;
+        
+        if (resourcesError) throw resourcesError;
+        
+        setResources(data as Resource[]);
+      } catch (error: any) {
+        setError(error.message);
       } finally {
         setLoading(false);
       }
     };
     
-    const fetchKits = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('kits')
-          .select('*')
-          .eq('is_active', true);
-        
-        if (error) {
-          throw error;
-        }
-        
-        setKits(data || []);
-      } catch (error: any) {
-        console.error('Error fetching kits:', error);
-      }
-    };
-    
-    const fetchLanguages = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('languages')
-          .select('*');
-        
-        if (error) {
-          throw error;
-        }
-        
-        setLanguages(data || []);
-      } catch (error: any) {
-        console.error('Error fetching languages:', error);
-      }
-    };
-    
     fetchResources();
-    fetchKits();
-    fetchLanguages();
-  }, [filters, kitId]);
-  
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-  };
-  
+  }, [selectedKitId, selectedLanguageId, selectedResourceType, searchQuery, limit]);
+
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {!kitId && (
+    <div>
+      <div className="mb-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <Label htmlFor="kit-filter">Filter by Kit</Label>
+            <Label htmlFor="search">Search</Label>
+            <Input
+              id="search"
+              placeholder="Search resources..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="kit">Kit</Label>
             <Select
-              value={filters.kitId}
-              onValueChange={(value) => handleFilterChange('kitId', value)}
+              value={selectedKitId || ''}
+              onValueChange={(value) => setSelectedKitId(value || null)}
             >
-              <SelectTrigger id="kit-filter">
+              <SelectTrigger id="kit">
                 <SelectValue placeholder="All Kits" />
               </SelectTrigger>
               <SelectContent>
@@ -130,62 +149,61 @@ const ResourceList: React.FC<ResourceListProps> = ({ kitId }) => {
               </SelectContent>
             </Select>
           </div>
-        )}
-        
-        <div>
-          <Label htmlFor="language-filter">Filter by Language</Label>
-          <Select
-            value={filters.languageId}
-            onValueChange={(value) => handleFilterChange('languageId', value)}
-          >
-            <SelectTrigger id="language-filter">
-              <SelectValue placeholder="All Languages" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All Languages</SelectItem>
-              {languages.map((language) => (
-                <SelectItem key={language.id} value={language.id}>
-                  {language.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div>
-          <Label htmlFor="type-filter">Filter by Type</Label>
-          <Select
-            value={filters.resourceType}
-            onValueChange={(value) => handleFilterChange('resourceType', value)}
-          >
-            <SelectTrigger id="type-filter">
-              <SelectValue placeholder="All Types" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All Types</SelectItem>
-              <SelectItem value="pdf">PDF Documents</SelectItem>
-              <SelectItem value="video">Videos</SelectItem>
-              <SelectItem value="audio">Audio</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div>
-          <Label htmlFor="search">Search</Label>
-          <Input
-            id="search"
-            placeholder="Search resources..."
-            value={filters.searchQuery}
-            onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
-          />
+          
+          <div>
+            <Label htmlFor="language">Language</Label>
+            <Select
+              value={selectedLanguageId || ''}
+              onValueChange={(value) => setSelectedLanguageId(value || null)}
+            >
+              <SelectTrigger id="language">
+                <SelectValue placeholder="All Languages" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Languages</SelectItem>
+                {languages.map((language) => (
+                  <SelectItem key={language.id} value={language.id}>
+                    {language.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <Label htmlFor="type">Type</Label>
+            <Select
+              value={selectedResourceType || ''}
+              onValueChange={(value) => setSelectedResourceType(value || null)}
+            >
+              <SelectTrigger id="type">
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="pdf">PDF Documents</SelectItem>
+                <SelectItem value="video">Videos</SelectItem>
+                <SelectItem value="audio">Audio</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
       
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
       {loading ? (
-        <div className="text-center py-8">Loading resources...</div>
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
       ) : resources.length === 0 ? (
-        <div className="text-center py-8">
-          No resources found. Try adjusting your filters.
+        <div className="text-center py-12 bg-gray-50 rounded-md">
+          <p className="text-gray-500">No resources found</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
