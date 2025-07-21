@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import AdminLayout from '@/components/layout/AdminLayout';
 
 const ManageResources: React.FC = () => {
   const [resources, setResources] = useState<Resource[]>([]);
@@ -114,103 +115,105 @@ const ManageResources: React.FC = () => {
   };
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Manage Resources</h1>
-      
-      <Tabs defaultValue="list">
-        <TabsList className="mb-6">
-          <TabsTrigger value="list">Resource List</TabsTrigger>
-          <TabsTrigger value="upload">Upload New Resource</TabsTrigger>
-        </TabsList>
+    <AdminLayout>
+      <div className="flex flex-col">
+        <h1 className="text-3xl font-bold mb-8">Manage Resources</h1>
         
-        <TabsContent value="list">
-          <Card>
-            <CardHeader>
-              <CardTitle>All Resources</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="text-center py-4">Loading resources...</div>
-              ) : resources.length === 0 ? (
-                <div className="text-center py-4">
-                  No resources found. Upload your first resource!
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {resources.map((resource) => (
-                      <TableRow key={resource.id}>
-                        <TableCell className="font-medium">{resource.title}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            {getResourceTypeIcon(resource.resource_type)}
-                            <span className="ml-2 capitalize">{resource.resource_type}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            resource.is_active 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {resource.is_active ? 'Active' : 'Inactive'}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(resource.created_at).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end space-x-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => navigate(`/resources/${resource.id}`)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant={resource.is_active ? "destructive" : "outline"}
-                              size="icon"
-                              onClick={() => handleToggleActive(resource)}
-                            >
-                              {resource.is_active ? (
-                                <Trash2 className="h-4 w-4" />
-                              ) : (
-                                <Edit className="h-4 w-4" />
-                              )}
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="icon"
-                              onClick={() => handleDelete(resource.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+        <Tabs defaultValue="list">
+          <TabsList className="mb-6">
+            <TabsTrigger value="list">Resource List</TabsTrigger>
+            <TabsTrigger value="upload">Upload New Resource</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="list">
+            <Card>
+              <CardHeader>
+                <CardTitle>All Resources</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="text-center py-4">Loading resources...</div>
+                ) : resources.length === 0 ? (
+                  <div className="text-center py-4">
+                    No resources found. Upload your first resource!
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Created</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="upload">
-          <ResourceUpload onSuccess={fetchResources} />
-        </TabsContent>
-      </Tabs>
-    </div>
+                    </TableHeader>
+                    <TableBody>
+                      {resources.map((resource) => (
+                        <TableRow key={resource.id}>
+                          <TableCell className="font-medium">{resource.title}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              {getResourceTypeIcon(resource.resource_type)}
+                              <span className="ml-2 capitalize">{resource.resource_type}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              resource.is_active 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {resource.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(resource.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end space-x-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => navigate(`/resources/${resource.id}`)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant={resource.is_active ? "destructive" : "outline"}
+                                size="icon"
+                                onClick={() => handleToggleActive(resource)}
+                              >
+                                {resource.is_active ? (
+                                  <Trash2 className="h-4 w-4" />
+                                ) : (
+                                  <Edit className="h-4 w-4" />
+                                )}
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => handleDelete(resource.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="upload">
+            <ResourceUpload onSuccess={fetchResources} />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AdminLayout>
   );
 };
 

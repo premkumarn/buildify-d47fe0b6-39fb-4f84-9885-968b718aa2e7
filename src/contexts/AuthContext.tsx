@@ -73,13 +73,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string, userData: Partial<UserProfile>) => {
+    // For demo purposes, if registering as admin@edtech.com, set role to admin
+    const isAdmin = email === 'admin@edtech.com';
+    const role = isAdmin ? 'admin' : userData.role || 'student';
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           full_name: userData.full_name,
-          role: userData.role || 'student',
+          role: role,
         },
       },
     });
@@ -89,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error: profileError } = await supabase.from('profiles').insert({
         id: data.user.id,
         ...userData,
+        role: role,
         is_active: true,
       });
 

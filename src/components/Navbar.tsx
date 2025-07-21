@@ -24,9 +24,9 @@ const Navbar = () => {
           <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors">Home</Link>
           {user && (
             <>
-              <Link to="/resources" className="text-gray-700 hover:text-blue-600 transition-colors">Resources</Link>
+              <Link to="/profile" className="text-gray-700 hover:text-blue-600 transition-colors">My Resources</Link>
               {user.user_metadata?.role === 'admin' && (
-                <Link to="/admin/resources" className="text-gray-700 hover:text-blue-600 transition-colors">Manage Resources</Link>
+                <Link to="/admin/dashboard" className="text-gray-700 hover:text-blue-600 transition-colors">Admin</Link>
               )}
             </>
           )}

@@ -56,5 +56,3 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ url, title }) => {
 };
 
 export default AudioPlayer;
-
-export default AudioPlayer;

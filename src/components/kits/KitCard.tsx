@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { Kit } from '@/types';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { getPublicUrl } from '@/lib/supabase';
 import { Package, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -19,7 +18,7 @@ const KitCard: React.FC<KitCardProps> = ({ kit, hasAccess }) => {
       <div className="relative aspect-video bg-gray-100">
         {kit.thumbnail_url ? (
           <img 
-            src={getPublicUrl('kits', kit.thumbnail_url)}
+            src={kit.thumbnail_url}
             alt={kit.title}
             className="w-full h-full object-cover"
           />

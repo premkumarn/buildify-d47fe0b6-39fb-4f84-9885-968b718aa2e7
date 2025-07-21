@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -57,7 +57,7 @@ const ResourceUpload: React.FC<ResourceUploadProps> = ({ onSuccess }) => {
     },
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch kits
@@ -223,18 +223,22 @@ const ResourceUpload: React.FC<ResourceUploadProps> = ({ onSuccess }) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Science Kit</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value || undefined}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a kit" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {kits.map((kit) => (
-                          <SelectItem key={kit.id} value={kit.id}>
-                            {kit.title} (Grade {kit.grade})
-                          </SelectItem>
-                        ))}
+                        {kits.length > 0 ? (
+                          kits.map((kit) => (
+                            <SelectItem key={kit.id} value={kit.id}>
+                              {kit.title} (Grade {kit.grade})
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-kits">No kits available</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -248,18 +252,22 @@ const ResourceUpload: React.FC<ResourceUploadProps> = ({ onSuccess }) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Language</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value || undefined}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a language" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {languages.map((language) => (
-                          <SelectItem key={language.id} value={language.id}>
-                            {language.name}
-                          </SelectItem>
-                        ))}
+                        {languages.length > 0 ? (
+                          languages.map((language) => (
+                            <SelectItem key={language.id} value={language.id}>
+                              {language.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-languages">No languages available</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />

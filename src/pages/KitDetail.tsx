@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import ResourceList from '@/components/resources/ResourceList';
 import { Kit, UserAccess } from '@/types';
+import MainLayout from '@/components/layout/MainLayout';
 
 const KitDetail: React.FC = () => {
   const { kitId } = useParams<{ kitId: string }>();
@@ -119,146 +120,152 @@ const KitDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        Loading kit details...
-      </div>
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8 text-center">
+          Loading kit details...
+        </div>
+      </MainLayout>
     );
   }
 
   if (!kit) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="text-2xl font-bold mb-4">Kit Not Found</h1>
-        <p className="mb-4">The kit you're looking for doesn't exist or has been removed.</p>
-        <Button onClick={() => navigate('/')}>Back to Home</Button>
-      </div>
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8 text-center">
+          <h1 className="text-2xl font-bold mb-4">Kit Not Found</h1>
+          <p className="mb-4">The kit you're looking for doesn't exist or has been removed.</p>
+          <Button onClick={() => navigate('/')}>Back to Home</Button>
+        </div>
+      </MainLayout>
     );
   }
 
   const hasAccess = !!userAccess;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <Button 
-          variant="outline" 
-          onClick={() => navigate('/')}
-          className="mb-4"
-        >
-          ← Back to Kits
-        </Button>
-        
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="md:w-1/3">
-            {kit.thumbnail_url ? (
-              <img 
-                src={kit.thumbnail_url} 
-                alt={kit.title} 
-                className="w-full h-auto rounded-lg shadow-md"
-              />
-            ) : (
-              <div className="w-full aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500">No image available</span>
-              </div>
-            )}
-            
-            <div className="mt-4">
-              <Badge>{`Grade ${kit.grade}`}</Badge>
-            </div>
-            
-            {!hasAccess && (
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle>Get Access</CardTitle>
-                  <CardDescription>
-                    Purchase this kit to access all resources
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold">$9.99</p>
-                  <p className="text-sm text-gray-500 mt-1">One-time purchase, lifetime access</p>
-                </CardContent>
-                <CardFooter>
-                  <Button 
-                    className="w-full" 
-                    onClick={handlePurchase}
-                    disabled={processingPayment}
-                  >
-                    {processingPayment ? 'Processing...' : 'Purchase Now'}
-                  </Button>
-                </CardFooter>
-              </Card>
-            )}
-            
-            {hasAccess && (
-              <Card className="mt-6 bg-green-50 border-green-200">
-                <CardHeader>
-                  <CardTitle className="text-green-700">You Have Access</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-green-700">
-                    Access Type: <span className="font-medium">{userAccess?.access_type}</span>
-                  </p>
-                  {userAccess?.valid_until && (
-                    <p className="text-sm text-green-600 mt-1">
-                      Valid until: {new Date(userAccess.valid_until).toLocaleDateString()}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/')}
+            className="mb-4"
+          >
+            ← Back to Kits
+          </Button>
           
-          <div className="md:w-2/3">
-            <h1 className="text-3xl font-bold mb-2">{kit.title}</h1>
-            <p className="text-gray-600 mb-6">{kit.description}</p>
-            
-            <Tabs defaultValue="resources" className="w-full">
-              <TabsList>
-                <TabsTrigger value="resources">Resources</TabsTrigger>
-                <TabsTrigger value="details">Details</TabsTrigger>
-              </TabsList>
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="md:w-1/3">
+              {kit.thumbnail_url ? (
+                <img 
+                  src={kit.thumbnail_url} 
+                  alt={kit.title} 
+                  className="w-full h-auto rounded-lg shadow-md"
+                />
+              ) : (
+                <div className="w-full aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
+                  <span className="text-gray-500">No image available</span>
+                </div>
+              )}
               
-              <TabsContent value="resources" className="mt-6">
-                <ResourceList kitId={kit.id} showAccessStatus />
-              </TabsContent>
+              <div className="mt-4">
+                <Badge>{`Grade ${kit.grade}`}</Badge>
+              </div>
               
-              <TabsContent value="details" className="mt-6">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="space-y-4">
-                      <div>
-                        <h3 className="font-medium">Grade Level</h3>
-                        <p>{`Grade ${kit.grade}`}</p>
-                      </div>
-                      
-                      <div>
-                        <h3 className="font-medium">What's Included</h3>
-                        <ul className="list-disc list-inside space-y-1 mt-2">
-                          <li>Instructional manuals (PDF)</li>
-                          <li>Explanatory videos</li>
-                          <li>Audio guides</li>
-                          <li>Multiple language support</li>
-                        </ul>
-                      </div>
-                      
-                      <div>
-                        <h3 className="font-medium">Learning Objectives</h3>
-                        <p className="mt-2">
-                          This physics kit is designed to help students understand fundamental 
-                          physics concepts through hands-on experiments and comprehensive 
-                          learning materials.
-                        </p>
-                      </div>
-                    </div>
+              {!hasAccess && (
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle>Get Access</CardTitle>
+                    <CardDescription>
+                      Purchase this kit to access all resources
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-2xl font-bold">$9.99</p>
+                    <p className="text-sm text-gray-500 mt-1">One-time purchase, lifetime access</p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      className="w-full" 
+                      onClick={handlePurchase}
+                      disabled={processingPayment}
+                    >
+                      {processingPayment ? 'Processing...' : 'Purchase Now'}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              )}
+              
+              {hasAccess && (
+                <Card className="mt-6 bg-green-50 border-green-200">
+                  <CardHeader>
+                    <CardTitle className="text-green-700">You Have Access</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-green-700">
+                      Access Type: <span className="font-medium">{userAccess?.access_type}</span>
+                    </p>
+                    {userAccess?.valid_until && (
+                      <p className="text-sm text-green-600 mt-1">
+                        Valid until: {new Date(userAccess.valid_until).toLocaleDateString()}
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
-              </TabsContent>
-            </Tabs>
+              )}
+            </div>
+            
+            <div className="md:w-2/3">
+              <h1 className="text-3xl font-bold mb-2">{kit.title}</h1>
+              <p className="text-gray-600 mb-6">{kit.description}</p>
+              
+              <Tabs defaultValue="resources" className="w-full">
+                <TabsList>
+                  <TabsTrigger value="resources">Resources</TabsTrigger>
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="resources" className="mt-6">
+                  <ResourceList kitId={kit.id} />
+                </TabsContent>
+                
+                <TabsContent value="details" className="mt-6">
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="font-medium">Grade Level</h3>
+                          <p>{`Grade ${kit.grade}`}</p>
+                        </div>
+                        
+                        <div>
+                          <h3 className="font-medium">What's Included</h3>
+                          <ul className="list-disc list-inside space-y-1 mt-2">
+                            <li>Instructional manuals (PDF)</li>
+                            <li>Explanatory videos</li>
+                            <li>Audio guides</li>
+                            <li>Multiple language support</li>
+                          </ul>
+                        </div>
+                        
+                        <div>
+                          <h3 className="font-medium">Learning Objectives</h3>
+                          <p className="mt-2">
+                            This physics kit is designed to help students understand fundamental 
+                            physics concepts through hands-on experiments and comprehensive 
+                            learning materials.
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

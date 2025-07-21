@@ -15,13 +15,17 @@ interface ResourceListProps {
   languageId?: string;
   resourceType?: string;
   limit?: number;
+  searchQuery?: string;
+  showAccessStatus?: boolean;
 }
 
 const ResourceList: React.FC<ResourceListProps> = ({ 
   kitId, 
   languageId, 
   resourceType,
-  limit 
+  limit,
+  searchQuery = '',
+  showAccessStatus = false
 }) => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [kits, setKits] = useState<Kit[]>([]);
@@ -33,7 +37,10 @@ const ResourceList: React.FC<ResourceListProps> = ({
   const [selectedKitId, setSelectedKitId] = useState<string | null>(kitId || null);
   const [selectedLanguageId, setSelectedLanguageId] = useState<string | null>(languageId || null);
   const [selectedResourceType, setSelectedResourceType] = useState<string | null>(resourceType || null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
+
+  // Use the prop searchQuery if provided, otherwise use local state
+  const effectiveSearchQuery = searchQuery !== undefined ? searchQuery : localSearchQuery;
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -89,8 +96,8 @@ const ResourceList: React.FC<ResourceListProps> = ({
           query = query.eq('resource_type', selectedResourceType);
         }
         
-        if (searchQuery) {
-          query = query.ilike('title', `%${searchQuery}%`);
+        if (effectiveSearchQuery) {
+          query = query.ilike('title', `%${effectiveSearchQuery}%`);
         }
         
         // Apply limit if specified
@@ -114,21 +121,23 @@ const ResourceList: React.FC<ResourceListProps> = ({
     };
     
     fetchResources();
-  }, [selectedKitId, selectedLanguageId, selectedResourceType, searchQuery, limit]);
+  }, [selectedKitId, selectedLanguageId, selectedResourceType, effectiveSearchQuery, limit]);
 
   return (
     <div>
       <div className="mb-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <Label htmlFor="search">Search</Label>
-            <Input
-              id="search"
-              placeholder="Search resources..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          {searchQuery === undefined && (
+            <div>
+              <Label htmlFor="search">Search</Label>
+              <Input
+                id="search"
+                placeholder="Search resources..."
+                value={localSearchQuery}
+                onChange={(e) => setLocalSearchQuery(e.target.value)}
+              />
+            </div>
+          )}
           
           <div>
             <Label htmlFor="kit">Kit</Label>
@@ -208,7 +217,11 @@ const ResourceList: React.FC<ResourceListProps> = ({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {resources.map((resource) => (
-            <ResourceCard key={resource.id} resource={resource} />
+            <ResourceCard 
+              key={resource.id} 
+              resource={resource} 
+              showAccessStatus={showAccessStatus}
+            />
           ))}
         </div>
       )}

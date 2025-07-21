@@ -10,6 +10,7 @@ import VideoPlayer from '@/components/resources/VideoPlayer';
 import AudioPlayer from '@/components/resources/AudioPlayer';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import MainLayout from '@/components/layout/MainLayout';
 
 const ResourceView: React.FC = () => {
   const { resourceId } = useParams<{ resourceId: string }>();
@@ -78,42 +79,48 @@ const ResourceView: React.FC = () => {
   
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading resource...</div>
-      </div>
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">Loading resource...</div>
+        </div>
+      </MainLayout>
     );
   }
   
   if (error || !resource) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Error</h2>
-          <p className="mb-4">{error || 'Resource not found'}</p>
-          <Button onClick={() => navigate(-1)}>Go Back</Button>
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Error</h2>
+            <p className="mb-4">{error || 'Resource not found'}</p>
+            <Button onClick={() => navigate(-1)}>Go Back</Button>
+          </div>
         </div>
-      </div>
+      </MainLayout>
     );
   }
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6 flex items-center">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="mr-4">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-        <h1 className="text-2xl font-bold">{resource.title}</h1>
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6 flex items-center">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="mr-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <h1 className="text-2xl font-bold">{resource.title}</h1>
+        </div>
+        
+        {resource.description && (
+          <p className="mb-6 text-gray-600">{resource.description}</p>
+        )}
+        
+        <div className="mb-8">
+          {renderResourceViewer()}
+        </div>
       </div>
-      
-      {resource.description && (
-        <p className="mb-6 text-gray-600">{resource.description}</p>
-      )}
-      
-      <div className="mb-8">
-        {renderResourceViewer()}
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

@@ -50,5 +50,3 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ url, title }) => {
 };
 
 export default PdfViewer;
-
-export default PdfViewer;
